@@ -37,59 +37,63 @@ class ViewController: UITableViewController {
         navigationController?.pushViewController(vc, animated: true)
     }
     
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//        // Do any additional setup after loading the view.
-//
-//        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Credits", style: .plain, target: self, action: #selector(showCredits))
-//        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(promptForFilter))
-//
-//        let urlString: String
-//
-//        if navigationController?.tabBarItem.tag == 0 {
-//            urlString = "https://api.whitehouse.gov/v1/petitions.json?limit=100"
-//        } else {
-//            urlString = "https://api.whitehouse.gov/v1/petitions.json?signatureCountFloor=10000&limit=100"
-//        }
-//
-//        //let urlString = "https://www.hackingwithswift.com/samples/petitions-1.json"
-//        DispatchQueue.global(qos: .userInitiated).async {
-//            [weak self] in
-//            if let url = URL(string: urlString) {
-//                if let data = try? Data(contentsOf: url) {
-//                    self?.parse(json: data)
-//                    return
-//                }
-//            }
-//
-//            self?.showError()
-//        }
-//    }
+    //    override func viewDidLoad() {
+    //        super.viewDidLoad()
+    //        // Do any additional setup after loading the view.
+    //
+    //        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Credits", style: .plain, target: self, action: #selector(showCredits))
+    //        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(promptForFilter))
+    //
+    //        let urlString: String
+    //
+    //        if navigationController?.tabBarItem.tag == 0 {
+    //            urlString = "https://api.whitehouse.gov/v1/petitions.json?limit=100"
+    //        } else {
+    //            urlString = "https://api.whitehouse.gov/v1/petitions.json?signatureCountFloor=10000&limit=100"
+    //        }
+    //
+    //        //let urlString = "https://www.hackingwithswift.com/samples/petitions-1.json"
+    //        DispatchQueue.global(qos: .userInitiated).async {
+    //            [weak self] in
+    //            if let url = URL(string: urlString) {
+    //                if let data = try? Data(contentsOf: url) {
+    //                    self?.parse(json: data)
+    //                    return
+    //                }
+    //            }
+    //
+    //            self?.showError()
+    //        }
+    //    }
     
-//    func parse(json: Data) {
-//        let decoder = JSONDecoder()
-//
-//        if let jsonPetitions = try? decoder.decode(Petitions.self, from: json) {
-//            petitions = jsonPetitions.results
-//            filteredPetitions = petitions
-//            DispatchQueue.main.async {
-//                [weak self] in
-//                self?.tableView.reloadData()
-//            }
-//        }
-//    }
+    //    func parse(json: Data) {
+    //        let decoder = JSONDecoder()
+    //
+    //        if let jsonPetitions = try? decoder.decode(Petitions.self, from: json) {
+    //            petitions = jsonPetitions.results
+    //            filteredPetitions = petitions
+    //            DispatchQueue.main.async {
+    //                [weak self] in
+    //                self?.tableView.reloadData()
+    //            }
+    //        }
+    //    }
     
-//    func showError() {
-//        DispatchQueue.main.async {
-//            [weak self] in
-//            let ac = UIAlertController(title: "Loading error", message: "There was a problem loading the feed; please check your connection and try again.", preferredStyle: .alert)
-//            ac.addAction(UIAlertAction(title: "Ok", style: .default))
-//            self?.present(ac, animated: true)
-//        }
-//    }
+    //    func showError() {
+    //        DispatchQueue.main.async {
+    //            [weak self] in
+    //            let ac = UIAlertController(title: "Loading error", message: "There was a problem loading the feed; please check your connection and try again.", preferredStyle: .alert)
+    //            ac.addAction(UIAlertAction(title: "Ok", style: .default))
+    //            self?.present(ac, animated: true)
+    //        }
+    //    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Credits", style: .plain, target: self, action: #selector(showCredits))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(promptForFilter))
+        
         
         performSelector(inBackground: #selector(fetchJSON), with: nil)
     }
@@ -140,7 +144,10 @@ class ViewController: UITableViewController {
         
         let submitAction = UIAlertAction(title: "Submit", style: .default) { [weak self, weak ac] _ in
             guard let filterString = ac?.textFields?[0].text else {return}
-            self?.filterResults(filterString)
+            DispatchQueue.global(qos: .userInitiated).async {
+                [weak self] in
+                self?.filterResults(filterString)
+            }
         }
         
         ac.addAction(submitAction)
@@ -160,7 +167,7 @@ class ViewController: UITableViewController {
             filterActive = true
         }
         
-        tableView.reloadData()
+        tableView.performSelector(onMainThread: #selector(UITableView.reloadData), with: nil, waitUntilDone: false)
     }
 }
 
